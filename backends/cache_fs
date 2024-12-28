@@ -42,7 +42,9 @@ restore_cache_symlink() {
   # shellcheck disable=2064  # actually want variable interpolated here
   trap "release_lock_folder '${from}'" SIGINT SIGTERM SIGQUIT
 
-  rm -rf "$to"
+  if [ -n "$1" ] && [ -e "$to" ]; then
+    rm -rf "$to"
+  fi
   ln -sf "$from" "$to"
 
   release_lock "${from}"
