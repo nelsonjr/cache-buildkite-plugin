@@ -14,9 +14,11 @@ DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 # shellcheck source=lib/lock.bash
 . "${DIR}/../lib/lock.bash"
 
-restore_cache() {
+restore_cache_file() {
   local from="${CACHE_FOLDER}/$1"
   local to="$2"
+
+  echo "Restoring cache as 'file'"
 
   wait_and_lock "${from}"
   # shellcheck disable=2064  # actually want variable interpolated here
@@ -25,6 +27,35 @@ restore_cache() {
   cp -a "$from" "$to"
 
   release_lock "${from}"
+}
+
+restore_cache_symlink() {
+  local from="${CACHE_FOLDER}/$1"
+  local to="$2"
+
+  echo "Restoring cache as 'symlink'"
+
+  wait_and_lock "${from}"
+  # shellcheck disable=2064  # actually want variable interpolated here
+  trap "release_lock_folder '${from}'" SIGINT SIGTERM SIGQUIT
+
+  rm -rf "$to"
+  ln -sf "$from" "$to"
+
+  release_lock "${from}"
+}
+
+restore_cache() {
+  local RESTORE_AS="$(plugin_read_config RESTORE_AS 'file')"
+
+  if [ "$RESTORE_AS" = 'file' ]; then
+    restore_cache_file "$@"
+  elif [ "$RESTORE_AS" = 'symlink' ]; then
+    restore_cache_symlink "$@"
+  else
+    echo "Unknown restore_as value '$RESTORE_AS'"
+    exit 1
+  fi
 }
 
 save_cache() {

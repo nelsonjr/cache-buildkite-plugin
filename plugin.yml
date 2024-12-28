@@ -29,6 +29,11 @@ configuration:
       type: string
     restore:
       $ref: '#/$defs/valid_levels'
+    restore_as:
+      type: string
+      enum:
+        - file
+        - symlink
     save:
       oneOf:
         - $ref: '#/$defs/valid_levels'
