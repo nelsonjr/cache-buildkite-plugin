@@ -9,11 +9,18 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${DIR}/../lib/compression.bash"
 
 RESTORE_PATH=$(plugin_read_config PATH)
-
 if [ -z "${RESTORE_PATH}" ]; then
   echo "+++ 🚨 Missing path option in the cache plugin to restore"
   exit 1
 fi
+
+RESTORE_PATH_TYPE=$(plugin_read_config PATH_TYPE 'unknown')
+if ! validate_path_type "${RESTORE_PATH_TYPE}"; then
+  echo "+++ 🚨 Invalid value for path_type option"
+  exit 1
+fi
+
+
 
 MAX_LEVEL=$(plugin_read_config RESTORE 'no')
 if [ "${MAX_LEVEL}" = 'no' ]; then
@@ -48,7 +55,12 @@ for CURRENT_LEVEL in "${SORTED_LEVELS[@]}"; do
       backend_exec get "${KEY}" "${TEMP_PATH}"
       uncompress "${TEMP_PATH}" "${RESTORE_PATH}"
     else
-      backend_exec get "${KEY}" "${RESTORE_PATH}"
+      if [ "$RESTORE_PATH_TYPE" = "dir" ]; then
+        echo "Restoring as directory"
+        backend_exec get "${KEY}/." "${RESTORE_PATH}"
+      else
+        backend_exec get "${KEY}" "${RESTORE_PATH}"
+      fi
     fi
 
     exit 0

@@ -27,6 +27,12 @@ configuration:
       type: string
     path:
       type: string
+    path_type:
+      type: string
+      enum:
+        - file
+        - dir
+        - unknown
     restore:
       $ref: '#/$defs/valid_levels'
     save:

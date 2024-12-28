@@ -60,3 +60,16 @@ function plugin_read_config() {
   local default="${2:-}"
   echo "${!var:-$default}"
 }
+
+function validate_path_type() {
+  local PATH_TYPE="$1"
+
+  VALID_PATH_TYPES=(file dir unknown)
+  for VALID in "${VALID_PATH_TYPES[@]}"; do
+    if [ "${PATH_TYPE}" = "${VALID}" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
