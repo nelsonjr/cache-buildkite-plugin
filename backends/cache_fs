@@ -46,8 +46,6 @@ restore_cache_symlink() {
 }
 
 restore_cache() {
-  local RESTORE_AS="$(plugin_read_config RESTORE_AS 'file')"
-
   if [ "$RESTORE_AS" = 'file' ]; then
     restore_cache_file "$@"
   elif [ "$RESTORE_AS" = 'symlink' ]; then
@@ -85,7 +83,7 @@ shift
 if [ "$OPCODE" = 'exists' ]; then
   exists_cache "$@"
 elif [ "$OPCODE" = 'get' ]; then
-  restore_cache "$@"
+  RESTORE_AS=$RESTORE_AS restore_cache "$@"
 elif [ "$OPCODE" = 'save' ]; then
   save_cache "$@"
 else
